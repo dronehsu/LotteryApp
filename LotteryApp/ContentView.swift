@@ -116,29 +116,29 @@ struct ContentView: View {
     // MARK: - 生日 / 姓名
 
     private var basicInfoSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        HStack(alignment: .top, spacing: 14) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("生日")
                     .font(.caption)
                     .foregroundStyle(.gray)
-                HStack(spacing: 10) {
-                    DatePicker("", selection: $birthdayDraft, displayedComponents: .date)
-                        .datePickerStyle(.compact)
-                        .labelsHidden()
-                        .tint(.yellow)
-                    Button("設定生日") {
-                        birthdayTimestamp = birthdayDraft.timeIntervalSince1970
-                    }
-                    .font(.caption.bold())
-                    .foregroundStyle(.black)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(RoundedRectangle(cornerRadius: 8).fill(Color.yellow))
+                DatePicker("", selection: $birthdayDraft, displayedComponents: .date)
+                    .datePickerStyle(.compact)
+                    .labelsHidden()
+                    .tint(.yellow)
+                Button("設定生日") {
+                    birthdayTimestamp = birthdayDraft.timeIntervalSince1970
                 }
-                Text(hasBirthday ? "已設定：\(formattedDate(birthday))" : "尚未設定，請選擇日期後點「設定生日」")
+                .font(.caption.bold())
+                .frame(maxWidth: .infinity)
+                .foregroundStyle(.black)
+                .padding(.vertical, 8)
+                .background(RoundedRectangle(cornerRadius: 8).fill(Color.yellow))
+                Text(hasBirthday ? "已設定：\(formattedDate(birthday))" : "尚未設定，請點「設定生日」")
                     .font(.system(size: 11))
                     .foregroundStyle(hasBirthday ? .green : .gray)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
             VStack(alignment: .leading, spacing: 8) {
                 Text("姓名")
                     .font(.caption)
@@ -148,6 +148,7 @@ struct ContentView: View {
                     .padding(10)
                     .background(RoundedRectangle(cornerRadius: 10).fill(Color(white: 0.12)))
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(14)
         .background(RoundedRectangle(cornerRadius: 14).fill(Color(white: 0.10)))
