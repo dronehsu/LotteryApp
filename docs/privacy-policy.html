@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>隱私權政策</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0b0c10;
+    --surface: #15171c;
+    --surface-2: #1c1f26;
+    --text: #eceef0;
+    --text-muted: #9aa0ab;
+    --accent: #f2b705;
+    --accent-ink: #24190a;
+    --rule: rgba(255,255,255,0.09);
+    --accent-soft: rgba(242,183,5,0.14);
+    --shadow: rgba(0,0,0,0.35);
+
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      color-scheme: light;
+      --bg: #f3f4f7;
+      --surface: #ffffff;
+      --surface-2: #eceef2;
+      --text: #14161a;
+      --text-muted: #5b6069;
+      --accent: #96690b;
+      --accent-ink: #ffffff;
+      --rule: rgba(20,22,26,0.10);
+      --accent-soft: rgba(150,105,11,0.10);
+      --shadow: rgba(20,22,26,0.10);
+    }
+  }
+
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --bg: #f3f4f7;
+    --surface: #ffffff;
+    --surface-2: #eceef2;
+    --text: #14161a;
+    --text-muted: #5b6069;
+    --accent: #96690b;
+    --accent-ink: #ffffff;
+    --rule: rgba(20,22,26,0.10);
+    --accent-soft: rgba(150,105,11,0.10);
+    --shadow: rgba(20,22,26,0.10);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Noto Sans TC", "PingFang TC", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.75;
+  }
+
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 56px 80px;
+  }
+
+  header.doc-head {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-bottom: 48px;
+  }
+
+  .brand-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .ball {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px var(--shadow);
+    flex-shrink: 0;
+  }
+  .ball span {
+    font-family: "Noto Serif TC", serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--accent-ink);
+  }
+
+  .brand-name {
+    font-family: "Noto Sans TC", sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+  }
+
+  h1 {
+    font-family: "Noto Serif TC", serif;
+    font-weight: 700;
+    font-size: clamp(32px, 6vw, 44px);
+    line-height: 1.25;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    align-self: flex-start;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+  }
+
+  nav.toc {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 44px;
+  }
+  nav.toc h2 {
+    font-family: "Noto Sans TC", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin: 0 0 12px;
+  }
+  nav.toc ol {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 6px 20px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  nav.toc a {
+    display: block;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 14.5px;
+    padding: 4px 0;
+    border-bottom: 1px solid transparent;
+  }
+  nav.toc a:hover, nav.toc a:focus-visible {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  nav.toc a:focus-visible { outline: none; }
+
+  section.clause {
+    padding-block: 30px;
+    border-top: 1px solid var(--rule);
+  }
+  section.clause:first-of-type { border-top: none; padding-top: 0; }
+
+  .clause h2 {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    font-family: "Noto Serif TC", serif;
+    font-weight: 700;
+    font-size: 21px;
+    margin: 0 0 14px;
+    scroll-margin-top: 24px;
+  }
+  .clause h2 .num {
+    font-family: "Noto Sans TC", sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 8px;
+    padding: 3px 9px;
+    flex-shrink: 0;
+  }
+
+  .clause p { margin: 0 0 14px; max-width: 62ch; color: var(--text); }
+  .clause p:last-child { margin-bottom: 0; }
+  .clause ul {
+    margin: 0 0 14px;
+    padding-left: 1.2em;
+    max-width: 60ch;
+  }
+  .clause li { margin-bottom: 8px; }
+  .clause li:last-child { margin-bottom: 0; }
+
+  .callout {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    padding: 22px 24px;
+  }
+
+  .fill {
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 1px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  footer.disclaimer {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+    color: var(--text-muted);
+    font-size: 13.5px;
+  }
+
+  @media (max-width: 480px) {
+    nav.toc ol { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="doc-head">
+    <div class="brand-row">
+      <div class="ball"><span>6</span></div>
+      <div class="brand-name">超樂透幸運選號</div>
+    </div>
+    <h1>隱私權政策</h1>
+    <span class="meta">最後更新日期：2026 年 9 月 16 日</span>
+  </header>
+
+  <nav class="toc" aria-label="章節目錄">
+    <h2>章節目錄</h2>
+    <ol>
+      <li><a href="#overview">1. 概述</a></li>
+      <li><a href="#data">2. 我們如何處理你的資料</a></li>
+      <li><a href="#thirdparty">3. 第三方服務與追蹤</a></li>
+      <li><a href="#retention">4. 資料保存與刪除</a></li>
+      <li><a href="#children">5. 兒童隱私</a></li>
+      <li><a href="#disclaimer">6. 選號結果免責聲明</a></li>
+      <li><a href="#changes">7. 政策異動</a></li>
+      <li><a href="#contact">8. 聯絡我們</a></li>
+    </ol>
+  </nav>
+
+  <section class="clause" id="overview">
+    <h2><span class="num">1</span>概述</h2>
+    <p>「超樂透幸運選號」（以下稱「本 App」）是一款在 iPhone 上執行的大樂透選號輔助工具，提供歷史統計、生日星座、生肖五行等娛樂性選號建議。本 App 免費、不需要註冊帳號，也沒有登入機制。</p>
+    <p>我們非常重視你的隱私，本政策說明本 App 會不會蒐集資料、資料如何被使用，以及你可以如何聯繫我們。</p>
+  </section>
+
+  <section class="clause" id="data">
+    <h2><span class="num">2</span>我們如何處理你的資料</h2>
+    <p>本 App 沒有後端伺服器，所有功能都在你的裝置上本機運算完成。以下資訊只會透過 Apple 系統內建的 <code>UserDefaults</code> 儲存在你的 iPhone 裡：</p>
+    <ul>
+      <li>你輸入的生日（用於換算星座、生肖與五行）</li>
+      <li>你輸入的姓名（用於姓名筆劃選號）</li>
+      <li>你在「無腦選號」輸入的文字內容</li>
+      <li>候選號碼數量等個人化設定</li>
+    </ul>
+    <p>這些資料<strong>不會被傳送到任何伺服器</strong>，開發者本人也無法存取、無法看到你輸入的任何內容。它們只存在於你自己的裝置上。</p>
+  </section>
+
+  <section class="clause" id="thirdparty">
+    <h2><span class="num">3</span>第三方服務與追蹤</h2>
+    <p>本 App 不整合任何第三方分析、廣告或行銷 SDK，不使用 Cookie 或裝置廣告識別碼，也不會對你的使用行為進行追蹤，因此不需要向你請求「App 追蹤透明度」（App Tracking Transparency）授權。</p>
+  </section>
+
+  <section class="clause" id="retention">
+    <h2><span class="num">4</span>資料保存與刪除</h2>
+    <p>由於所有資料只存在你的裝置本機，你可以隨時透過以下方式清除：</p>
+    <ul>
+      <li>在 App 內清空生日、姓名或無腦選號輸入欄位</li>
+      <li>將本 App 從你的 iPhone 移除，即會一併清除所有本機儲存的資料</li>
+    </ul>
+  </section>
+
+  <section class="clause" id="children">
+    <h2><span class="num">5</span>兒童隱私</h2>
+    <p>本 App 內容涉及彩券選號的娛樂性參考，非特別針對兒童設計。我們不會刻意向兒童蒐集任何個人資料；如前述，本 App 本身也不會蒐集或上傳任何使用者的個人資料。</p>
+  </section>
+
+  <section class="clause" id="disclaimer">
+    <h2><span class="num">6</span>選號結果免責聲明</h2>
+    <p>大樂透開獎結果完全隨機，本 App 提供之歷史統計分析與個人化選號建議僅供參考娛樂，<strong>不保證任何中獎機率</strong>。本 App 與台灣彩券股份有限公司或任何官方彩券機構均無合作或關聯關係。</p>
+  </section>
+
+  <section class="clause" id="changes">
+    <h2><span class="num">7</span>政策異動</h2>
+    <p>若本政策內容有所調整，我們會更新本頁面上方標示的「最後更新日期」，並建議你定期回來查閱最新版本。</p>
+  </section>
+
+  <section class="clause" id="contact">
+    <h2><span class="num">8</span>聯絡我們</h2>
+    <div class="callout">
+      <p>如果你對本隱私權政策有任何疑問，歡迎透過以下方式聯繫我們：</p>
+      <p style="margin-bottom:0">聯絡信箱：<span class="fill">請填入你的聯絡信箱</span></p>
+    </div>
+  </section>
+
+  <footer class="disclaimer">
+    本頁面為隱私權政策草稿，發布前請將上方「聯絡信箱」欄位替換為你實際使用的信箱，並確認頁首的 App 名稱與 App Store 上架名稱一致。
+  </footer>
+
+</div>
+</body>
+</html>
