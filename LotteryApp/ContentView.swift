@@ -21,7 +21,7 @@ struct ContentView: View {
     @State private var resultNumbers: [Int]?
     @State private var resultRuleNames: [String] = []
 
-    private let repository: DrawResultRepository = MockDrawResultRepository()
+    private let repository: DrawResultRepository = BundledDrawResultRepository()
     @State private var drawResults: [DrawResult] = []
 
     private let calendar = Calendar(identifier: .gregorian)
@@ -87,6 +87,11 @@ struct ContentView: View {
             }
             if drawResults.isEmpty {
                 drawResults = repository.fetchAll()
+            }
+        }
+        .task {
+            if let fresh = await RemoteDrawResultSync.refresh(), !fresh.isEmpty {
+                drawResults = fresh
             }
         }
         .onReceive(timer) { now = $0 }

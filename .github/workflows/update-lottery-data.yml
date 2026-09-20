@@ -1,0 +1,39 @@
+name: Update Lotto649 data
+
+on:
+  schedule:
+    # 大樂透每週二、五開獎；這裡排在開獎隔天台北時間 01:00（UTC 17:00 前一天）執行，
+    # 給官網一點時間把結果更新到查詢系統。
+    - cron: "0 17 * * 2,5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Fetch latest draws
+        run: python3 scripts/update_lottery_data.py
+
+      - name: Sync bundled snapshot used by the app
+        run: cp docs/lotto649.json LotteryApp/Resources/lotto649.json
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- docs/lotto649.json LotteryApp/Resources/lotto649.json; then
+            echo "No changes."
+            exit 0
+          fi
+          git add docs/lotto649.json LotteryApp/Resources/lotto649.json
+          git commit -m "chore: update lotto649 data"
+          git push
