@@ -9,6 +9,7 @@
 import Foundation
 
 enum SelectionRule: String, CaseIterable, Identifiable {
+    case freeText
     case topFrequent
     case leastFrequent
     case dueNumbers
@@ -16,7 +17,6 @@ enum SelectionRule: String, CaseIterable, Identifiable {
     case chineseHour
     case chineseZodiac
     case nameStroke
-    case freeText
 
     var id: String { rawValue }
 
