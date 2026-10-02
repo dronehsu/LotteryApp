@@ -33,8 +33,9 @@ enum ChineseHour: Int, CaseIterable {
         return ChineseHour(rawValue: index) ?? .zi
     }
 
-    /// 時辰對應號碼參考表：吉時規則來源待確認，暫以時辰序位對照。
+    /// 時辰對應號碼參考表：依時辰所屬地支換算五行，再對照河圖數理展開
+    /// （與生肖共用同一套地支，例如子時與鼠年都屬水）。
     var referenceNumbers: [Int] {
-        [rawValue * 4 + 1, rawValue * 4 + 2, rawValue * 4 + 3]
+        FiveElement.fromEarthlyBranch(index: rawValue).referenceNumbers
     }
 }

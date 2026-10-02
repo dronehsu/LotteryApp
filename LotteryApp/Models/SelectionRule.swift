@@ -39,8 +39,8 @@ enum SelectionRule: String, CaseIterable, Identifiable {
         case .leastFrequent: return "依全部歷史資料統計出現頻率最低"
         case .dueNumbers: return "依前 50 期走勢計算遺漏值，推薦最久未開出的號碼"
         case .birthdayZodiac: return "依生日換算星座，搭配星座參考幸運數字（需先設定生日）"
-        case .chineseHour: return "依當下時辰對照參考表產生（規則來源待確認）"
-        case .chineseZodiac: return "依生日換算生肖與五行，對照參考表產生（需先設定生日，規則來源待確認）"
+        case .chineseHour: return "依當下時辰的地支五行，對照河圖數理產生（命理民俗參考）"
+        case .chineseZodiac: return "依生日換算生肖與五行，對照河圖數理產生（需先設定生日，命理民俗參考）"
         case .nameStroke: return "依姓名筆劃數換算產生（需先輸入姓名，簡化版估算）"
         case .freeText: return "打的內容不重要，文字直接轉換成一組號碼，純娛樂"
         }

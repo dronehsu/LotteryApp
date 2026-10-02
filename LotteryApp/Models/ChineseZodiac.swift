@@ -32,8 +32,8 @@ enum ChineseZodiac: Int, CaseIterable {
         return ChineseZodiac(rawValue: index) ?? .rat
     }
 
-    /// 生肖對應號碼參考表：規則來源待確認，暫以生肖序位對照號碼區間。
+    /// 生肖對應號碼參考表：依生肖所屬地支換算五行，再對照河圖數理展開。
     var referenceNumbers: [Int] {
-        [rawValue * 4 + 1, rawValue * 4 + 2, rawValue * 4 + 3]
+        FiveElement.fromEarthlyBranch(index: rawValue).referenceNumbers
     }
 }

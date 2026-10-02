@@ -68,7 +68,7 @@ struct ContentView: View {
                             }
                         }
 
-                        Text("以上規則多為民俗參考或簡化版換算，正式規則來源待確認；大樂透開獎結果完全隨機，僅供參考娛樂，不保證中獎機率。")
+                        Text("以上規則多為民俗命理參考或簡化版換算，並非官方標準；大樂透開獎結果完全隨機，僅供參考娛樂，不保證中獎機率。")
                             .font(.caption2)
                             .foregroundStyle(.gray)
                     }
@@ -240,7 +240,10 @@ struct ContentView: View {
             return (currentHour.referenceNumbers, seed)
         case .chineseZodiac:
             guard hasBirthday, let chineseZodiac, let fiveElement else { return nil }
-            return (chineseZodiac.referenceNumbers + fiveElement.referenceNumbers, Int(birthdayTimestamp) &+ 17)
+            // 生肖（地支五行）與生年（天干五行）交錯排列，避免其中一邊號碼較多時獨佔結果。
+            let interleaved = zip(chineseZodiac.referenceNumbers, fiveElement.referenceNumbers)
+                .flatMap { [$0, $1] }
+            return (interleaved, Int(birthdayTimestamp) &+ 17)
         case .nameStroke:
             let trimmed = userName.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !trimmed.isEmpty else { return nil }
