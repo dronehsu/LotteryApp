@@ -5,14 +5,14 @@
 
 import Foundation
 
-/// 一期大樂透開獎結果。
+/// 一期開獎結果。
 struct DrawResult: Identifiable, Hashable {
-    /// 期別字串，例如 "115074"，同時作為唯一識別碼。
+    /// 期別字串，例如 "115000092"，同時作為唯一識別碼。
     let id: String
     var period: String { id }
     let date: Date
-    /// 6 顆一般開獎號碼，已由小到大排序。
+    /// 一般開獎號碼（大樂透、威力彩第一區 6 顆；今彩539 5 顆），已由小到大排序。
     let numbers: [Int]
-    /// 特別號。
-    let specialNumber: Int
+    /// 大樂透：特別號；威力彩：第二區號碼；今彩539：沒有（nil）。
+    let specialNumber: Int?
 }

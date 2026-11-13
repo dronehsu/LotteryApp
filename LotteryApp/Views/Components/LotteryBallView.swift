@@ -5,26 +5,30 @@
 
 import SwiftUI
 
-/// 單顆開獎號碼球，特別號以紅色標示。
+/// 單顆號碼球：金色球、紅字；特別號為紅球金字。
 struct LotteryBallView: View {
     let number: Int
     var isSpecial: Bool = false
-
-    private var fillColor: Color {
-        isSpecial ? Color(red: 0.90, green: 0.24, blue: 0.24) : Color(white: 0.16)
-    }
-
-    private var textColor: Color {
-        isSpecial ? .white : .yellow
-    }
+    var size: CGFloat = 38
 
     var body: some View {
         Text(String(format: "%02d", number))
-            .font(.system(size: 14, weight: .bold, design: .rounded))
-            .foregroundStyle(textColor)
-            .frame(width: 32, height: 32)
-            .background(Circle().fill(fillColor))
-            .overlay(Circle().stroke(Color.white.opacity(0.08), lineWidth: 1))
+            .font(.system(size: size * 0.44, weight: .heavy, design: .rounded))
+            .foregroundStyle(isSpecial ? Theme.gold : Theme.redInk)
+            .frame(width: size, height: size)
+            .background(
+                Circle().fill(
+                    RadialGradient(
+                        colors: isSpecial
+                            ? [Color(red: 0.95, green: 0.30, blue: 0.25), Color(red: 0.60, green: 0.05, blue: 0.05)]
+                            : [Color(red: 1.0, green: 0.95, blue: 0.70), Theme.gold, Theme.goldDeep],
+                        center: UnitPoint(x: 0.35, y: 0.3),
+                        startRadius: 1, endRadius: size * 0.7
+                    )
+                )
+            )
+            .overlay(Circle().stroke(Color.white.opacity(0.35), lineWidth: 1))
+            .shadow(color: .black.opacity(0.35), radius: 2, y: 2)
     }
 }
 
@@ -34,5 +38,5 @@ struct LotteryBallView: View {
         LotteryBallView(number: 42, isSpecial: true)
     }
     .padding()
-    .background(Color.black)
+    .background(Theme.background)
 }

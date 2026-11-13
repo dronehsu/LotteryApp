@@ -2,7 +2,7 @@
 //  EmptyHintCard.swift
 //  LotteryApp
 //
-//  尚未輸入必要資訊時，取代 StatSuggestionCard 顯示的提示卡片。
+//  尚未產生號碼時，取代 StatSuggestionCard 顯示的提示卡片。
 //
 
 import SwiftUI
@@ -14,20 +14,26 @@ struct EmptyHintCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
-                .font(.subheadline.bold())
-                .foregroundStyle(.yellow)
+                .font(.headline)
+                .foregroundStyle(Theme.gold)
             Text(hint)
                 .font(.caption)
-                .foregroundStyle(.gray)
+                .foregroundStyle(Theme.subtext)
+            // 六顆空的金框球，暗示號碼會出現在這裡
+            HStack(spacing: 6) {
+                ForEach(0..<6, id: \.self) { _ in
+                    Circle()
+                        .stroke(Theme.gold.opacity(0.5), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
+                        .frame(width: 38, height: 38)
+                }
+            }
         }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 14).fill(Color(white: 0.10)))
+        .fortuneCard()
     }
 }
 
 #Preview {
-    EmptyHintCard(title: "生日 + 星座幸運號", hint: "請先在上方輸入生日")
+    EmptyHintCard(title: "幸運號碼", hint: "勾選下方想用的規則，按「產生號碼」")
         .padding()
-        .background(Color.black)
+        .background(Theme.background)
 }

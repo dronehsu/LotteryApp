@@ -1,0 +1,49 @@
+name: Update lottery data
+
+on:
+  schedule:
+    # 今彩539 週一至六、威力彩週一四、大樂透週二五，都是晚上 20:30 開獎。
+    # 排在台北時間 22:30（UTC 14:30）執行，給官網時間更新查詢系統。
+    - cron: "30 14 * * 1-6"
+  workflow_dispatch:
+    inputs:
+      backfill:
+        description: "從頭回補所有歷史資料（第一次加入新彩種時勾選）"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Fetch latest draws
+        run: |
+          if [ "${{ inputs.backfill }}" = "true" ]; then
+            python3 scripts/update_lottery_data.py --backfill
+          else
+            python3 scripts/update_lottery_data.py
+          fi
+
+      - name: Sync bundled snapshots used by the app
+        run: cp docs/lotto649.json docs/superlotto638.json docs/daily539.json LotteryApp/Resources/
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- docs LotteryApp/Resources; then
+            echo "No changes."
+            exit 0
+          fi
+          git add docs/*.json LotteryApp/Resources/*.json
+          git commit -m "chore: update lottery data"
+          git push

@@ -11,31 +11,41 @@ struct StatSuggestionCard: View {
     let subtitle: String
     let numbers: [Int]
     var captions: [String] = []
+    /// 威力彩第二區號碼（其他彩種為 nil）
+    var secondZone: Int? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
-                .font(.subheadline.bold())
-                .foregroundStyle(.yellow)
+                .font(.headline)
+                .foregroundStyle(Theme.gold)
             Text(subtitle)
                 .font(.caption)
-                .foregroundStyle(.gray)
-            HStack(spacing: 10) {
+                .foregroundStyle(Theme.subtext)
+            // 號碼較多時自動換行，6～10 顆都放得下
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: min(max(numbers.count, 1), 6)),
+                      alignment: .leading, spacing: 8) {
                 ForEach(Array(numbers.enumerated()), id: \.offset) { index, number in
                     VStack(spacing: 4) {
                         LotteryBallView(number: number)
                         if index < captions.count, !captions[index].isEmpty {
                             Text(captions[index])
                                 .font(.system(size: 10))
-                                .foregroundStyle(.gray)
+                                .foregroundStyle(Theme.subtext)
                         }
                     }
                 }
             }
+            if let secondZone {
+                HStack(spacing: 8) {
+                    Text("第二區")
+                        .font(.subheadline.bold())
+                        .foregroundStyle(Theme.gold)
+                    LotteryBallView(number: secondZone, isSpecial: true)
+                }
+            }
         }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 14).fill(Color(white: 0.10)))
+        .fortuneCard()
     }
 }
 
@@ -47,5 +57,5 @@ struct StatSuggestionCard: View {
         captions: ["3 次", "2 次", "2 次", "2 次", "1 次", "1 次"]
     )
     .padding()
-    .background(Color.black)
+    .background(Theme.background)
 }
