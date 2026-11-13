@@ -52,6 +52,11 @@ enum SavedTicketStore {
         return tickets
     }
 
+    static func delete(_ ticket: SavedTicket, from tickets: inout [SavedTicket]) {
+        tickets.removeAll { $0.id == ticket.id }
+        save(tickets)
+    }
+
     static func save(_ tickets: [SavedTicket]) {
         if let data = try? JSONEncoder().encode(tickets) {
             UserDefaults.standard.set(data, forKey: key)
@@ -66,9 +71,12 @@ struct SavedTicketsSection: View {
     let game: LotteryGame
     /// 這個彩種最新一期開獎（沒有資料時為 nil）
     let latestDraw: DrawResult?
+    /// 這個彩種的所有開獎資料（用來找每組號碼該對哪一期）
+    var draws: [DrawResult] = []
 
     private var gameTickets: [SavedTicket] { tickets.filter { $0.game == game } }
     @State private var showShopMode = false
+    @State private var pendingDelete: SavedTicket?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -133,10 +141,21 @@ struct SavedTicketsSection: View {
         .fullScreenCover(isPresented: $showShopMode) {
             ShopModeView(tickets: $tickets)
         }
+        .confirmationDialog("要刪除這組號碼嗎？", isPresented: Binding(
+            get: { pendingDelete != nil },
+            set: { if !$0 { pendingDelete = nil } }
+        ), titleVisibility: .visible) {
+            Button("刪除", role: .destructive) {
+                if let t = pendingDelete { SavedTicketStore.delete(t, from: &tickets) }
+                pendingDelete = nil
+            }
+            Button("取消", role: .cancel) { pendingDelete = nil }
+        }
     }
 
     private func ticketRow(_ ticket: SavedTicket) -> some View {
-        let hits = matchCount(ticket)
+        let draw = targetDraw(for: ticket)
+        let hits = matchCount(ticket, draw)
         return VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .firstTextBaseline) {
                 Text(Self.dateText(ticket.createdAt))
@@ -149,30 +168,35 @@ struct SavedTicketsSection: View {
                         .padding(.horizontal, 6).padding(.vertical, 2)
                         .background(Capsule().fill(Theme.gold))
                 }
-                if latestDraw != nil {
-                    Text(hitText(hits, special: hasSpecial(ticket)))
+                if let draw {
+                    Text("第 \(draw.period.suffix(3)) 期" + hitText(hits, special: hasSpecial(ticket, draw)))
                         .font(.caption.bold())
-                        .foregroundStyle(isWinning(ticket) ? Theme.gold : Theme.subtext)
+                        .foregroundStyle(isWinning(ticket, draw) ? Theme.gold : Theme.subtext)
+                } else {
+                    Text("等待開獎")
+                        .font(.caption.bold())
+                        .foregroundStyle(Theme.subtext)
                 }
                 Spacer()
                 Button {
-                    tickets.removeAll { $0.id == ticket.id }
-                    SavedTicketStore.save(tickets)
+                    pendingDelete = ticket
                 } label: {
-                    Image(systemName: "trash")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(Theme.subtext)
-                        .frame(width: 36, height: 30)
+                    Label("刪除", systemImage: "trash")
+                        .font(.caption.bold())
+                        .foregroundStyle(Theme.text)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Capsule().fill(Color.black.opacity(0.3)))
+                        .contentShape(Capsule())   // 整顆按鈕都可以點
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("刪除這組號碼")
             }
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 6),
                       alignment: .leading, spacing: 6) {
                 ForEach(ticket.numbers, id: \.self) { n in
-                    let hit = isHit(n)
-                    LotteryBallView(number: n, isSpecial: game == .lotto649 && n == latestDraw?.specialNumber, size: 34)
-                        .opacity(latestDraw == nil || hit ? 1 : 0.4)
+                    let hit = isHit(n, draw)
+                    LotteryBallView(number: n, isSpecial: game == .lotto649 && n == draw?.specialNumber, size: 34)
+                        .opacity(draw == nil || hit ? 1 : 0.4)
                         .overlay(
                             Circle().stroke(Color.white, lineWidth: hit ? 2.5 : 0)
                         )
@@ -184,8 +208,8 @@ struct SavedTicketsSection: View {
                         .font(.caption.bold())
                         .foregroundStyle(Theme.subtext)
                     LotteryBallView(number: second, isSpecial: true, size: 34)
-                        .opacity(latestDraw == nil || latestDraw?.specialNumber == second ? 1 : 0.4)
-                        .overlay(Circle().stroke(Color.white, lineWidth: latestDraw?.specialNumber == second ? 2.5 : 0))
+                        .opacity(draw == nil || draw?.specialNumber == second ? 1 : 0.4)
+                        .overlay(Circle().stroke(Color.white, lineWidth: draw?.specialNumber == second ? 2.5 : 0))
                 }
             }
             if !ticket.rules.isEmpty {
@@ -201,20 +225,28 @@ struct SavedTicketsSection: View {
 
     // MARK: - 對獎
 
-    private func isHit(_ n: Int) -> Bool {
-        guard let latestDraw else { return false }
-        if latestDraw.numbers.contains(n) { return true }
+    /// 這組號碼要對的那一期：收藏之後第一個開獎的期別。
+    /// 開獎時間是晚上 20:30，所以開獎日當天晚上才收藏的號碼，會對下一期。
+    private func targetDraw(for ticket: SavedTicket) -> DrawResult? {
+        draws
+            .filter { $0.date.addingTimeInterval(20.5 * 3600) > ticket.createdAt }
+            .min { $0.date < $1.date }
+    }
+
+    private func isHit(_ n: Int, _ draw: DrawResult?) -> Bool {
+        guard let draw else { return false }
+        if draw.numbers.contains(n) { return true }
         // 大樂透的特別號也算對中；威力彩第二區另外比
-        return game == .lotto649 && latestDraw.specialNumber == n
+        return game == .lotto649 && draw.specialNumber == n
     }
 
-    private func matchCount(_ ticket: SavedTicket) -> Int {
-        guard let latestDraw else { return 0 }
-        return ticket.numbers.filter { latestDraw.numbers.contains($0) }.count
+    private func matchCount(_ ticket: SavedTicket, _ draw: DrawResult?) -> Int {
+        guard let draw else { return 0 }
+        return ticket.numbers.filter { draw.numbers.contains($0) }.count
     }
 
-    private func hasSpecial(_ ticket: SavedTicket) -> Bool {
-        guard let latestDraw, let special = latestDraw.specialNumber else { return false }
+    private func hasSpecial(_ ticket: SavedTicket, _ draw: DrawResult?) -> Bool {
+        guard let draw, let special = draw.specialNumber else { return false }
         switch game {
         case .lotto649: return ticket.numbers.contains(special)
         case .superLotto638: return ticket.secondZone == special
@@ -223,18 +255,18 @@ struct SavedTicketsSection: View {
     }
 
     private func hitText(_ hits: Int, special: Bool) -> String {
-        if hits == 0 && !special { return "最新一期沒對中" }
+        if hits == 0 && !special { return "沒對中" }
         let extra = special ? (game == .superLotto638 ? "＋第二區" : "＋特別號") : ""
-        return "最新一期對中 \(hits) 個" + extra
+        return "對中 \(hits) 個" + extra
     }
 
     /// 達到最低獎的門檻：今彩539 對中 2 個；大樂透 3 個；威力彩 第一區 1 個＋第二區或第一區 3 個
-    private func isWinning(_ ticket: SavedTicket) -> Bool {
-        let hits = matchCount(ticket)
+    private func isWinning(_ ticket: SavedTicket, _ draw: DrawResult?) -> Bool {
+        let hits = matchCount(ticket, draw)
         switch game {
         case .daily539: return hits >= 2
-        case .lotto649: return hits >= 3 || (hits >= 2 && hasSpecial(ticket))
-        case .superLotto638: return hits >= 3 || (hits >= 1 && hasSpecial(ticket))
+        case .lotto649: return hits >= 3 || (hits >= 2 && hasSpecial(ticket, draw))
+        case .superLotto638: return hits >= 3 || (hits >= 1 && hasSpecial(ticket, draw))
         }
     }
 
@@ -251,6 +283,7 @@ struct SavedTicketsSection: View {
 struct ShopModeView: View {
     @Binding var tickets: [SavedTicket]
     @Environment(\.dismiss) private var dismiss
+    @State private var pendingDelete: SavedTicket?
 
     var body: some View {
         ZStack {
@@ -289,6 +322,16 @@ struct ShopModeView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .confirmationDialog("要刪除這組號碼嗎？", isPresented: Binding(
+            get: { pendingDelete != nil },
+            set: { if !$0 { pendingDelete = nil } }
+        ), titleVisibility: .visible) {
+            Button("刪除", role: .destructive) {
+                if let t = pendingDelete { SavedTicketStore.delete(t, from: &tickets) }
+                pendingDelete = nil
+            }
+            Button("取消", role: .cancel) { pendingDelete = nil }
+        }
         // 在投注站看號碼時，螢幕不要自動變暗、鎖定
         .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
@@ -313,6 +356,18 @@ struct ShopModeView: View {
                         .overlay(Capsule().stroke(Theme.gold, lineWidth: ticket.bought ? 0 : 1.5))
                 }
                 .buttonStyle(.plain)
+                Button {
+                    pendingDelete = ticket
+                } label: {
+                    Image(systemName: "trash")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(Theme.text)
+                        .frame(width: 40, height: 36)
+                        .background(Circle().fill(Color.black.opacity(0.3)))
+                        .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("刪除這組號碼")
             }
             // 大顆號碼，一排最多 5 顆
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 5),

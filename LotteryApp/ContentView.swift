@@ -75,7 +75,7 @@ struct ContentView: View {
                         GamePicker(selection: gameBinding)
                         resultSection
                         generateButton
-                        SavedTicketsSection(tickets: $savedTickets, game: game, latestDraw: latestDraw)
+                        SavedTicketsSection(tickets: $savedTickets, game: game, latestDraw: latestDraw, draws: drawResults)
                         CandidateCountPicker(minimum: game.pickCount)
                         basicInfoSection
 
@@ -88,7 +88,7 @@ struct ContentView: View {
                             }
                         }
 
-                        Text("以上規則多為民俗命理參考或簡化版換算，並非官方標準；大樂透開獎結果完全隨機，僅供參考娛樂，不保證中獎機率。")
+                        Text("以上規則多為民俗命理參考或簡化版換算，並非官方標準；彩券開獎結果完全隨機，僅供參考娛樂，不保證中獎機率。")
                             .font(.caption2)
                             .foregroundStyle(Theme.subtext)
                     }
