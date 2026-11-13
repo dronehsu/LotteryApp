@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct SavedTicket: Codable, Identifiable, Equatable {
     var id = UUID()
@@ -14,6 +15,8 @@ struct SavedTicket: Codable, Identifiable, Equatable {
     let numbers: [Int]
     /// 威力彩第二區
     var secondZone: Int? = nil
+    /// 在投注站已經照這組號碼下注了
+    var bought: Bool = false
     let rules: [String]
     let createdAt: Date
 
@@ -32,6 +35,7 @@ struct SavedTicket: Codable, Identifiable, Equatable {
         game = try c.decodeIfPresent(LotteryGame.self, forKey: .game) ?? .lotto649
         numbers = try c.decode([Int].self, forKey: .numbers)
         secondZone = try c.decodeIfPresent(Int.self, forKey: .secondZone)
+        bought = try c.decodeIfPresent(Bool.self, forKey: .bought) ?? false
         rules = try c.decodeIfPresent([String].self, forKey: .rules) ?? []
         createdAt = try c.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
     }
@@ -64,6 +68,7 @@ struct SavedTicketsSection: View {
     let latestDraw: DrawResult?
 
     private var gameTickets: [SavedTicket] { tickets.filter { $0.game == game } }
+    @State private var showShopMode = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -100,6 +105,20 @@ struct SavedTicketsSection: View {
                 .background(RoundedRectangle(cornerRadius: 12).fill(Color.black.opacity(0.2)))
             }
 
+            if !tickets.isEmpty {
+                Button {
+                    showShopMode = true
+                } label: {
+                    Label("到投注站：大字顯示全部號碼", systemImage: "storefront.fill")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .foregroundStyle(Theme.redInk)
+                        .background(RoundedRectangle(cornerRadius: 12).fill(Theme.goldGradient))
+                }
+                .buttonStyle(.plain)
+            }
+
             if gameTickets.isEmpty {
                 Text("產生號碼後按「收藏這組」，三種彩券合計最多可以存 10 組，之後再來對獎。")
                     .font(.caption)
@@ -111,6 +130,9 @@ struct SavedTicketsSection: View {
             }
         }
         .fortuneCard()
+        .fullScreenCover(isPresented: $showShopMode) {
+            ShopModeView(tickets: $tickets)
+        }
     }
 
     private func ticketRow(_ ticket: SavedTicket) -> some View {
@@ -120,6 +142,13 @@ struct SavedTicketsSection: View {
                 Text(Self.dateText(ticket.createdAt))
                     .font(.caption.bold())
                     .foregroundStyle(Theme.text)
+                if ticket.bought {
+                    Text("已下注")
+                        .font(.caption2.bold())
+                        .foregroundStyle(Theme.redInk)
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(Capsule().fill(Theme.gold))
+                }
                 if latestDraw != nil {
                     Text(hitText(hits, special: hasSpecial(ticket)))
                         .font(.caption.bold())
@@ -214,5 +243,100 @@ struct SavedTicketsSection: View {
         f.locale = Locale(identifier: "zh_Hant_TW")
         f.dateFormat = "yyyy/MM/dd"
         return f.string(from: date)
+    }
+}
+
+
+/// 投注站模式：全部收藏號碼用大字顯示，依彩種分組，螢幕不會自動變暗
+struct ShopModeView: View {
+    @Binding var tickets: [SavedTicket]
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ZStack {
+            Theme.background.ignoresSafeArea()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    HStack {
+                        Text("🏪 投注站模式")
+                            .font(.system(size: 28, weight: .heavy))
+                            .foregroundStyle(Theme.goldGradient)
+                        Spacer()
+                        Button("完成") { dismiss() }
+                            .font(.title3.bold())
+                            .foregroundStyle(Theme.redInk)
+                            .padding(.horizontal, 18).padding(.vertical, 8)
+                            .background(Capsule().fill(Theme.goldGradient))
+                    }
+                    Text("照著號碼填單或念給老闆聽；下注完按「標記已下注」。")
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.subtext)
+
+                    ForEach(LotteryGame.allCases) { game in
+                        let list = tickets.filter { $0.game == game }
+                        if !list.isEmpty {
+                            Text(game.name)
+                                .font(.system(size: 26, weight: .heavy))
+                                .foregroundStyle(Theme.gold)
+                                .padding(.top, 6)
+                            ForEach(Array(list.enumerated()), id: \.element.id) { index, ticket in
+                                bigTicket(ticket, index: index + 1)
+                            }
+                        }
+                    }
+                }
+                .padding(20)
+            }
+        }
+        .preferredColorScheme(.dark)
+        // 在投注站看號碼時，螢幕不要自動變暗、鎖定
+        .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
+        .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
+    }
+
+    private func bigTicket(_ ticket: SavedTicket, index: Int) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("第 \(index) 組")
+                    .font(.title3.bold())
+                    .foregroundStyle(Theme.text)
+                Spacer()
+                Button {
+                    toggleBought(ticket)
+                } label: {
+                    Label(ticket.bought ? "已下注" : "標記已下注",
+                          systemImage: ticket.bought ? "checkmark.circle.fill" : "circle")
+                        .font(.subheadline.bold())
+                        .foregroundStyle(ticket.bought ? Theme.redInk : Theme.gold)
+                        .padding(.horizontal, 12).padding(.vertical, 6)
+                        .background(Capsule().fill(ticket.bought ? AnyShapeStyle(Theme.goldGradient) : AnyShapeStyle(Color.clear)))
+                        .overlay(Capsule().stroke(Theme.gold, lineWidth: ticket.bought ? 0 : 1.5))
+                }
+                .buttonStyle(.plain)
+            }
+            // 大顆號碼，一排最多 5 顆
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 5),
+                      alignment: .leading, spacing: 10) {
+                ForEach(ticket.numbers, id: \.self) { n in
+                    LotteryBallView(number: n, size: 56)
+                }
+            }
+            if let second = ticket.secondZone {
+                HStack(spacing: 10) {
+                    Text("第二區")
+                        .font(.title3.bold())
+                        .foregroundStyle(Theme.gold)
+                    LotteryBallView(number: second, isSpecial: true, size: 56)
+                }
+            }
+        }
+        .fortuneCard()
+        .opacity(ticket.bought ? 0.6 : 1)
+    }
+
+    private func toggleBought(_ ticket: SavedTicket) {
+        guard let i = tickets.firstIndex(where: { $0.id == ticket.id }) else { return }
+        tickets[i].bought.toggle()
+        SavedTicketStore.save(tickets)
     }
 }
