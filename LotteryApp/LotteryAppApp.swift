@@ -9,9 +9,13 @@ import SwiftUI
 
 @main
 struct LotteryAppApp: App {
+    @State private var store = PurchaseManager()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(store)
+                .task { await store.start() }
         }
     }
 }

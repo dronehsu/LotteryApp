@@ -1,0 +1,38 @@
+{
+  "identifier" : "8F3C2A10",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "50.0",
+      "familyShareable" : false,
+      "internalID" : "6755000001",
+      "localizations" : [
+        {
+          "description" : "不限次數產生號碼，一次購買永久有效",
+          "displayName" : "解鎖無限選號",
+          "locale" : "zh_TW"
+        }
+      ],
+      "productID" : "com.jungping.LotteryApp.unlimited",
+      "referenceName" : "解鎖無限選號",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "zh_TW",
+    "_storefront" : "TWN",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

@@ -33,6 +33,9 @@ struct ContentView: View {
     @State private var mascotNote: String?
     @State private var savedTickets: [SavedTicket] = []
     @State private var resultSecondZone: Int?
+    @Environment(PurchaseManager.self) private var store
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var showPaywall = false
 
     private let repository: DrawResultRepository = BundledDrawResultRepository()
     @State private var drawResults: [DrawResult] = []
@@ -121,6 +124,12 @@ struct ContentView: View {
             mascotBounce += 1
         }
         .onReceive(timer) { now = $0 }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { store.refreshDay() }   // 跨日後免費次數歸零
+        }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
+        }
     }
 
     // MARK: - 結果
@@ -267,18 +276,39 @@ struct ContentView: View {
     // MARK: - 產生號碼
 
     private var generateButton: some View {
-        Button {
-            generate()
-        } label: {
-            Text("🧧 產生號碼")
-                .font(.headline)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
+        VStack(spacing: 6) {
+            Button {
+                // 今天的免費次數用完、又還沒購買 → 顯示購買畫面
+                guard store.canGenerate else {
+                    showPaywall = true
+                    return
+                }
+                generate()
+            } label: {
+                Text("🧧 產生號碼")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+            }
+            .foregroundStyle(Theme.redInk)
+            .background(RoundedRectangle(cornerRadius: 12).fill(Theme.goldGradient))
+            .disabled(selectedRules.isEmpty)
+            .opacity(selectedRules.isEmpty ? 0.4 : 1)
+
+            if !store.isUnlocked {
+                Button {
+                    showPaywall = true
+                } label: {
+                    Text(store.remainingToday > 0
+                         ? "今天還可以免費選 \(store.remainingToday) 次・解鎖無限選號"
+                         : "今天的免費次數用完了・解鎖無限選號")
+                        .font(.caption.bold())
+                        .foregroundStyle(Theme.gold)
+                        .underline()
+                }
+                .buttonStyle(.plain)
+            }
         }
-        .foregroundStyle(Theme.redInk)
-        .background(RoundedRectangle(cornerRadius: 12).fill(Theme.goldGradient))
-        .disabled(selectedRules.isEmpty)
-        .opacity(selectedRules.isEmpty ? 0.4 : 1)
     }
 
     private func contribution(for rule: SelectionRule) -> (numbers: [Int], seed: Int)? {
@@ -379,6 +409,7 @@ struct ContentView: View {
         }
         resultRuleNames = usedNames
         mascotBounce += 1   // 魔酷熊跳一下
+        store.recordUse()
     }
 
     private func formattedDate(_ date: Date) -> String {
@@ -390,4 +421,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environment(PurchaseManager())
 }
